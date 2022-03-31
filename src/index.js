@@ -1,8 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { interceptSpotifyAuthRedirect } from './utils/OAuth';
+import * as storage from './utils/storage';
+
 import './index.css';
+
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+
+const isAuthenticated = () => {
+  try {
+    const { token, type } = interceptSpotifyAuthRedirect();
+    storage.setStorage('TOKEN', token);
+    storage.setStorage('TOKEN_TYPE', type);
+  } catch (error) {
+    storage.clearStorage();
+  }
+};
+
+isAuthenticated();
 
 ReactDOM.render(
   <React.StrictMode>
@@ -10,8 +26,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
