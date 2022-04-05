@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import PlaylistContainer from './components/playlistContainer';
-import SearchBar from './components/search-bar';
+import PlaylistContainer from './components/PlaylistContainer';
+import SearchBar from './components/search-bar/index';
 
 import authService from './api/services/auth';
 import trackService from './api/services/track';
