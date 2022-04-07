@@ -1,42 +1,84 @@
-import { useState, useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
+import shallow from 'zustand/shallow';
 
-import Login from './components/login';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useHistory,
+} from 'react-router-dom';
+
+import { useSelector, useDispatch } from 'react-redux';
+import { setToken } from './store/tokenSlice';
+
+import { useUser } from './store/user';
+
+import { useLogin, useProfile } from './hooks/auth';
+
 import Header from './components/header';
-import PlaylistCreator from './components/playlist-creator';
 
-import profileService from './api/profile';
+// Secret Page
+import PlaylistCreator from './pages/secret/playlist-creator';
 
-import { isAuth } from './utils/OAuth';
+import Login from './pages/login';
 
-function App() {
-  const [profile, setProfile] = useState(null);
-
-  const getCurrentUserProfile = async () => {
-    try {
-      const { data } = await profileService.getCurrentUserProfile();
-      setProfile(data);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
-    }
-  };
+function SecretPage({ children }) {
+  const history = useHistory();
+  const [getUser] = useUser((state) => [state.getUser], shallow);
 
   useEffect(() => {
-    if (isAuth) {
-      getCurrentUserProfile();
+    const user = getUser();
+    if (!user.token) {
+      history.push('/');
+    }
+  }, []);
+
+  return children;
+}
+
+function App() {
+  const history = useHistory();
+  const token = useSelector((state) => state.token.value);
+  // eslint-disable-next-line no-console
+  console.log('token', token);
+  const dispatch = useDispatch();
+
+  const [, interceptLoginRedirect] = useLogin();
+  const [getProfile] = useProfile();
+  const [logged, getUser] = useUser(
+    (state) => [state.logged, state.getUser],
+    shallow
+  );
+
+  useEffect(() => {
+    const user = getUser();
+    if (!user.token) {
+      interceptLoginRedirect();
+    } else {
+      dispatch(setToken(user.token));
+      getProfile();
+      history.push('/create-playlist');
     }
   }, []);
 
   return (
-    <div className="app">
-      {!isAuth && <Login />}
-      {isAuth && (
-        <>
-          <Header username={profile?.display_name} />
-          <PlaylistCreator userId={profile?.id} />
-        </>
-      )}
-    </div>
+    <Suspense fallback={<div>Loading</div>}>
+      <div className="app">
+        {logged && <Header />}
+        <Router>
+          <Switch>
+            <Route path="/">
+              <Login />
+            </Route>
+            <SecretPage>
+              <Route path="/create-playlist">
+                <PlaylistCreator />
+              </Route>
+            </SecretPage>
+          </Switch>
+        </Router>
+      </div>
+    </Suspense>
   );
 }
 
