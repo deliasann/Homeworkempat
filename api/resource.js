@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getStorage } from '../utils/storage';
 
-const API_BASE_URL = process.env.REACT_APP_SPOTIFY_KEY;
+const API_BASE_URL = process.env.REACT_APP_SPOTIFY_API_BASE_URL;
 
 function createResource() {
   const instance = axios.create({
@@ -18,7 +18,6 @@ function createResource() {
       const type = getStorage('TOKEN_TYPE');
 
       if (token) {
-        // eslint-disable-next-line no-param-reassign
         config.headers.Authorization = `${type} ${token}`;
       }
 
@@ -29,5 +28,4 @@ function createResource() {
 
   return instance;
 }
-
 export default createResource();

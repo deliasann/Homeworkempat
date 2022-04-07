@@ -1,4 +1,4 @@
-import resource from '../resource';
+import resource from './resource';
 
 export default {
   search(query) {
