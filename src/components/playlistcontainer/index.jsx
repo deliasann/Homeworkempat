@@ -1,24 +1,23 @@
-import authService from '../../../api/auth';
+import PlaylistItem from '../playlist-item';
 
 import './index.css';
 
-function Login() {
-  const handleAuthSpotify = () => {
-    authService.login();
-  };
+function PlaylistContainer({ tracks, onSelectTrack, selectedTracks }) {
+  function renderPlaylistItems() {
+    return tracks.map((item) => {
+      const { uri } = item;
+      return (
+        <PlaylistItem
+          key={uri}
+          track={item}
+          onSelectTrack={onSelectTrack}
+          isSelected={selectedTracks.includes(uri)}
+        />
+      );
+    });
+  }
 
-  return (
-    <div className="auth-container">
-      <h1 className="text-center">Spotify Playlist Creator</h1>
-      <button
-        type="button"
-        onClick={handleAuthSpotify}
-        className="btn btn-spotify btn-login-spotify mx-auto"
-      >
-        Login to Spotify
-      </button>
-    </div>
-  );
+  return <div className="playlist-container">{renderPlaylistItems()}</div>;
 }
 
-export default Login;
+export default PlaylistContainer;
